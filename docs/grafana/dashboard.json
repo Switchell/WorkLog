@@ -1,0 +1,155 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {"type": "postgres", "uid": "postgres"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+          "unit": "h"
+        }
+      },
+      "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0},
+      "id": 1,
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"datasource": {"type": "postgres", "uid": "postgres"}, "format": "table", "rawQuery": true, "rawSql": "SELECT COALESCE(SUM(\"Time\"), 0) as value FROM work_logs", "refId": "A"}],
+      "title": "Всего часов",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "postgres", "uid": "postgres"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+          "unit": "short"
+        }
+      },
+      "gridPos": {"h": 4, "w": 6, "x": 6, "y": 0},
+      "id": 2,
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"datasource": {"type": "postgres", "uid": "postgres"}, "format": "table", "rawQuery": true, "rawSql": "SELECT COUNT(DISTINCT \"Sotrudnik\") as value FROM work_logs", "refId": "A"}],
+      "title": "Сотрудников",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "postgres", "uid": "postgres"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+          "unit": "currencyRUB"
+        }
+      },
+      "gridPos": {"h": 4, "w": 6, "x": 12, "y": 0},
+      "id": 3,
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"datasource": {"type": "postgres", "uid": "postgres"}, "format": "table", "rawQuery": true, "rawSql": "SELECT COALESCE(SUM(w.\"Time\" * COALESCE(r.\"Client_Rate\", 0)), 0) as value FROM work_logs w LEFT JOIN employee_rates r ON w.\"Sotrudnik\" = r.\"Sotrudnik\"", "refId": "A"}],
+      "title": "Выручка (₽)",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "postgres", "uid": "postgres"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+          "unit": "currencyRUB"
+        }
+      },
+      "gridPos": {"h": 4, "w": 6, "x": 18, "y": 0},
+      "id": 4,
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"datasource": {"type": "postgres", "uid": "postgres"}, "format": "table", "rawQuery": true, "rawSql": "SELECT COALESCE(SUM(w.\"Time\" * COALESCE(r.\"Rate\", 0)), 0) as value FROM work_logs w LEFT JOIN employee_rates r ON w.\"Sotrudnik\" = r.\"Sotrudnik\"", "refId": "A"}],
+      "title": "Затраты (₽)",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "postgres", "uid": "postgres"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}
+        }
+      },
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4},
+      "id": 5,
+      "options": {"displayLabels": ["name", "percent"], "legend": {"displayMode": "list", "placement": "right", "values": []}, "pieType": "pie", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "tooltip": {"mode": "single", "sort": "none"}},
+      "targets": [{"datasource": {"type": "postgres", "uid": "postgres"}, "format": "table", "rawQuery": true, "rawSql": "SELECT \"Sotrudnik\" as metric, SUM(\"Time\") as \"Часы\" FROM work_logs GROUP BY \"Sotrudnik\" ORDER BY \"Часы\" DESC", "refId": "A"}],
+      "title": "Часы по сотрудникам",
+      "type": "piechart"
+    },
+    {
+      "datasource": {"type": "postgres", "uid": "postgres"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}
+        }
+      },
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 4},
+      "id": 6,
+      "options": {"displayLabels": ["name", "percent"], "legend": {"displayMode": "list", "placement": "right", "values": []}, "pieType": "pie", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "tooltip": {"mode": "single", "sort": "none"}},
+      "targets": [{"datasource": {"type": "postgres", "uid": "postgres"}, "format": "table", "rawQuery": true, "rawSql": "SELECT \"Proect\" as metric, SUM(\"Time\") as \"Часы\" FROM work_logs WHERE \"Proect\" IS NOT NULL AND \"Proect\" != 'Без проекта' GROUP BY \"Proect\" ORDER BY \"Часы\" DESC", "refId": "A"}],
+      "title": "Часы по проектам",
+      "type": "piechart"
+    },
+    {
+      "datasource": {"type": "postgres", "uid": "postgres"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "custom": {"align": "auto", "cellOptions": {"type": "auto"}, "inspect": false},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}
+        }
+      },
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 12},
+      "id": 7,
+      "options": {"cellHeight": "sm", "footer": {"countRows": false, "fields": "", "reducer": ["sum"], "show": false}, "showHeader": true},
+      "targets": [{"datasource": {"type": "postgres", "uid": "postgres"}, "format": "table", "rawQuery": true, "rawSql": "SELECT w.\"Sotrudnik\" as \"Сотрудник\", w.\"Proect\" as \"Проект\", w.\"Date\" as \"Дата\", w.\"Time\" as \"Часы\", ROUND(w.\"Time\" * COALESCE(r.\"Rate\", 0), 2) as \"Стоимость\" FROM work_logs w LEFT JOIN employee_rates r ON w.\"Sotrudnik\" = r.\"Sotrudnik\" ORDER BY w.\"Date\" DESC, w.\"Sotrudnik\"", "refId": "A"}],
+      "title": "Детализация по сотрудникам",
+      "type": "table"
+    },
+    {
+      "datasource": {"type": "postgres", "uid": "postgres"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "custom": {"align": "auto", "cellOptions": {"type": "auto"}, "inspect": false},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}
+        }
+      },
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 20},
+      "id": 8,
+      "options": {"cellHeight": "sm", "footer": {"countRows": false, "fields": "", "reducer": ["sum"], "show": true}, "showHeader": true},
+      "targets": [{"datasource": {"type": "postgres", "uid": "postgres"}, "format": "table", "rawQuery": true, "rawSql": "SELECT w.\"Sotrudnik\" as \"Сотрудник\", SUM(w.\"Time\") as \"Всего часов\", ROUND(SUM(w.\"Time\" * COALESCE(r.\"Rate\", 0)), 2) as \"Затраты\", ROUND(SUM(w.\"Time\" * COALESCE(r.\"Client_Rate\", 0)), 2) as \"Выручка\", ROUND(SUM(w.\"Time\" * (COALESCE(r.\"Client_Rate\", 0) - COALESCE(r.\"Rate\", 0))), 2) as \"Прибыль\" FROM work_logs w LEFT JOIN employee_rates r ON w.\"Sotrudnik\" = r.\"Sotrudnik\" GROUP BY w.\"Sotrudnik\" ORDER BY \"Всего часов\" DESC", "refId": "A"}],
+      "title": "Сводка по сотрудникам",
+      "type": "table"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["axis", "worktracker"],
+  "templating": {"list": []},
+  "time": {"from": "now-30d", "to": "now"},
+  "timepicker": {},
+  "timezone": "",
+  "title": "AXIS ERP Dashboard",
+  "uid": "axis-dashboard-v3",
+  "version": 3
+}

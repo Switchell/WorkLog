@@ -1,0 +1,10 @@
+streamlit
+pandas
+sqlalchemy
+psycopg2-binary
+plotly
+fpdf2
+pyTelegramBotAPI==4.26.0
+python-dotenv
+openpyxl
+bcrypt

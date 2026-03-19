@@ -1,0 +1,6 @@
+FROM python:3.9-slim
+WORKDIR /app
+COPY src/ .
+RUN pip install streamlit pandas plotly sqlalchemy psycopg2-binary python-dotenv fpdf2 bcrypt
+EXPOSE 8501
+CMD ["streamlit", "run", "app_client.py", "--server.port=8501", "--server.address=0.0.0.0"]

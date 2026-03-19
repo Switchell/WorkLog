@@ -1,0 +1,15 @@
+{
+  "name": "AXIS PostgreSQL",
+  "type": "postgres",
+  "access": "proxy",
+  "url": "localhost:5432",
+  "database": "workday_db",
+  "user": "user",
+  "secureJsonData": {
+    "password": "password"
+  },
+  "jsonData": {
+    "sslmode": "disable"
+  },
+  "uid": "axis_postgres"
+}
