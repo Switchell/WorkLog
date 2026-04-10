@@ -4,6 +4,9 @@
 
 **Репозиторий:** [github.com/Switchell/WorkLog](https://github.com/Switchell/WorkLog)
 
+
+<img width="1557" height="1200" alt="Screenshot_2" src="https://github.com/user-attachments/assets/93d49815-b240-4cbe-b9b0-7cb4b20ee646" />
+
 ## Документация
 
 | Файл | Содержание |
