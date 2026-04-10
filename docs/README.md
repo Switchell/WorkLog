@@ -49,37 +49,50 @@ WorkLog — простая и мощная система для учёта ра
 
 ---
 
-## 🚀 Быстрый старт
+## Документация
+
+| Документ | Содержание |
+|----------|------------|
+| [СОСТОЯНИЕ_И_ROADMAP.md](./СОСТОЯНИЕ_И_ROADMAP.md) | Аудит проекта, пробелы, план развития |
+| [КОНТЕКСТ_ПРОЕКТА.md](./КОНТЕКСТ_ПРОЕКТА.md) | Устройство Docker, БД, Grafana, нюансы |
+| [DEPLOY.md](./DEPLOY.md) | Развёртывание на сервере, чеклист |
+
+---
+
+## Быстрый старт
 
 ### 1. Установка
 
 ```bash
-# Клонируйте проект
-cd work-tracker
+cd WorkLog   # или имя вашей папки клона
 
-# Настройте .env
-nano .env
+cp .env.example .env
+nano .env    # задайте DB_PASSWORD и при необходимости TG_*, пароли клиентов
 ```
 
-### 2. Запуск
+### 2. Запуск (из корня репозитория)
 
 ```bash
-docker-compose -f docker/docker-compose.yml up -d
+docker compose --env-file .env -f docker/docker-compose.yml up -d
 ```
 
-### 3. Готово!
+На Linux/macOS можно: `./scripts/start.sh` (подставляет тот же compose и `.env`).
 
-- **Приложение**: http://localhost/
-- **Grafana**: http://localhost:3001
-- **Логин**: `admin`
-- **Пароль**: `2213`
+### 3. Адреса после запуска
+
+- **Приложение (nginx):** http://localhost/
+- **Админка напрямую:** http://localhost:8502
+- **Клиентский портал:** http://localhost/client/ или http://localhost:8503
+- **Grafana:** http://localhost:3001
+
+**Учётные данные** не хранятся в README: админка — логин/пароль из кода/`ADDITIONAL_USERS` и вашей смены пароля; Grafana — `GRAFANA_ADMIN_*` в `.env` или сброс через `grafana cli` (см. [CONTRIBUTING.md](../CONTRIBUTING.md) и `docker-compose` сервис `grafana`).
 
 ---
 
-## 📁 Структура проекта
+## Структура проекта
 
 ```
-work-tracker/
+WorkLog/
 ├── src/                     # Исходный код
 │   ├── app.py              # Основное приложение
 │   ├── app_client.py       # Клиентский портал
@@ -135,10 +148,10 @@ work-tracker/
 ### На сервере
 ```bash
 # 1. Скопировать проект
-scp -r work-tracker user@server:/home/user/
+scp -r ./WorkLog user@server:/home/user/
 
 # 2. Настроить .env
-nano .env
+cd WorkLog && nano .env
 
 # 3. Запустить
 chmod +x scripts/*.sh
@@ -163,6 +176,8 @@ chmod +x scripts/*.sh
 - Ежедневная сводка
 - Выручка и затраты
 - Прибыль
+
+Доступ к `api.telegram.org` с некоторых сетей возможен только через **VPN** или прокси; без этого отправка может завершаться таймаутом (данные в базе не страдают).
 
 ---
 
@@ -198,4 +213,4 @@ chmod +x scripts/*.sh
 
 ---
 
-*AXIS ERP PRO — учёт времени, который просто работает.*
+*WorkLog — учёт времени, который просто работает.*
