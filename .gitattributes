@@ -1,0 +1,4 @@
+# Карточка репозитория: основной язык — Python (Linguist)
+*.md linguist-documentation
+docs/** linguist-documentation
+scripts/** linguist-vendored
