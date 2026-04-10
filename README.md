@@ -4,8 +4,19 @@
 
 **Репозиторий:** [github.com/Switchell/WorkLog](https://github.com/Switchell/WorkLog)
 
+## Кому подойдёт / не подойдёт
 
-<img width="1557" height="1200" alt="Screenshot_2" src="https://github.com/user-attachments/assets/93d49815-b240-4cbe-b9b0-7cb4b20ee646" />
+| Подойдёт | Не подойдёт |
+|----------|-------------|
+| Фриланс и **маленькие команды**, учёт часов, отчёты, **Excel** | Крупный **HR enterprise** из коробки |
+| **Свой сервер** (Docker), Grafana, Telegram-отчёты | SaaS без установки с готовым облаком под ключ |
+| Кто готов читать `docs/` и настроить `.env` | «Установил и не трогал» без Docker |
+
+## Три шага до первого результата
+
+1. `cp .env.example .env` — пароли БД, при желании Telegram.  
+2. `docker compose --env-file .env -f docker/docker-compose.yml up -d`.  
+3. Открыть URL из **[docs/README.md](docs/README.md)** (nginx / админка / Grafana).
 
 ## Документация
 
