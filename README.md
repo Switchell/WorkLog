@@ -1,9 +1,10 @@
+
 # WorkLog
 
 Учёт рабочего времени для фриланса и небольших команд: **Streamlit**, **PostgreSQL**, **Grafana**, **Docker**, отчёты и импорт из Excel.
 
 **Репозиторий:** [github.com/Switchell/WorkLog](https://github.com/Switchell/WorkLog)
-
+<img width="1557" height="1200" alt="Screenshot_2" src="https://github.com/user-attachments/assets/04fb8cf7-964b-4141-8f9f-8c3fb726cfe2" />
 ## Кому подойдёт / не подойдёт
 
 | Подойдёт | Не подойдёт |
