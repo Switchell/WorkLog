@@ -1,10 +1,10 @@
-streamlit
+streamlit>=1.33.0
 pandas
 sqlalchemy
 psycopg2-binary
 plotly
 fpdf2
-pyTelegramBotAPI==4.26.0
+requests>=2.28
 python-dotenv
 openpyxl
 bcrypt

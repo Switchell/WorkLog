@@ -1,6 +1,19 @@
 # Настройка Grafana для AXIS
 
-## 1. Подключение к базе данных
+## Docker (рекомендуется)
+
+В `docker/docker-compose.yml` для Grafana подключены:
+
+- том **`grafana_data`** — дашборды и настройки **сохраняются** после пересоздания контейнера;
+- **provisioning**: источник данных PostgreSQL и дашборд из `docker/grafana/`.
+
+После `docker compose up -d grafana` откройте http://localhost:3001 → папка **AXIS** → **AXIS ERP Dashboard**. Пароль учётной записи Grafana — тот, что вы задали при первом входе (`admin`/`admin`, если ещё не меняли).
+
+Если сменили пароль БД в `docker-compose` у сервиса `db`, обновите его же в `docker/grafana/provisioning/datasources/datasources.yml`.
+
+---
+
+## 1. Подключение к базе данных (вручную, без Docker provisioning)
 
 1. Откройте Grafana: http://localhost:3001
 2. Логин/пароль: `admin` / `admin`

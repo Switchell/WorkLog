@@ -1,16 +1,27 @@
+# Подстановка DB_*: запускайте из корня репозитория с
+#   docker compose --env-file .env -f docker/docker-compose.yml up -d
+# или см. scripts/start.sh
 services:
   db:
-    image: postgres:15
+    image: postgres:15.10
     container_name: axis_db
     restart: unless-stopped
+    env_file:
+      - ../.env
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: workday_db
+      POSTGRES_USER: ${DB_USER:-user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+      POSTGRES_DB: ${DB_NAME:-workday_db}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
     networks:
       - axis_network
 
@@ -24,23 +35,65 @@ services:
     container_name: axis_admin
     expose:
       - "8501"
+    # Прямой доступ к админке с хоста (параллельно основному входу через nginx :80)
+    ports:
+      - "8502:8501"
     volumes:
       - ../src:/app
       - ../backups:/backups
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     env_file: ../.env
+    # Внутри Docker-сети Postgres доступен по имени сервиса `db`, не по container_name axis_db.
+    environment:
+      DB_HOST: db
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8501/_stcore/health', timeout=5)\"",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
     networks:
       - axis_network
 
   grafana:
-    image: grafana/grafana
+    image: grafana/grafana:11.5.1
     restart: unless-stopped
     container_name: axis_grafana
+    env_file:
+      - ../.env
+    environment:
+      DB_USER: ${DB_USER:-user}
+      DB_PASSWORD: ${DB_PASSWORD:-password}
+      DB_NAME: ${DB_NAME:-workday_db}
+      # Вход в UI (применяется при первом создании БД Grafana; см. CONTRIBUTING / .env.example)
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_SERVER_ROOT_URL: ${GRAFANA_ROOT_URL:-http://localhost:3001/}
+      GF_USERS_DEFAULT_THEME: ${GRAFANA_DEFAULT_THEME:-dark}
+      # Файл с тома: см. grafana/dashboards/axis-dashboard.json
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /etc/grafana/dashboards/axis-dashboard.json
     ports:
       - "3001:3000"
+    volumes:
+      # Иначе все дашборды и пароль живут только внутри контейнера и пропадают при пересоздании.
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/etc/grafana/dashboards:ro
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:3000/api/health >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
     networks:
       - axis_network
 
@@ -52,16 +105,32 @@ services:
     container_name: axis_client
     expose:
       - "8501"
+    # Опционально: прямой доступ к Streamlit клиента с хоста (аналогично admin :8502)
+    ports:
+      - "8503:8501"
     volumes:
       - ../src:/app
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     env_file: ../.env
+    environment:
+      DB_HOST: db
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8501/_stcore/health', timeout=5)\"",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
     networks:
       - axis_network
 
   nginx:
-    image: nginx:latest
+    image: nginx:1.27.4-alpine
     container_name: axis_nginx
     restart: unless-stopped
     ports:
@@ -71,8 +140,16 @@ services:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - certbot_etc:/etc/letsencrypt
     depends_on:
-      - admin
-      - client
+      admin:
+        condition: service_healthy
+      client:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/ || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
     networks:
       - axis_network
 
@@ -89,6 +166,7 @@ services:
 
 volumes:
   postgres_data:
+  grafana_data:
   certbot_etc:
   certbot_var:
 

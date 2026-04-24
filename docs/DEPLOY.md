@@ -1,5 +1,25 @@
 # WorkLog - Инструкция по развёртыванию
 
+## Чеклист
+
+**Первый запуск на сервере**
+
+- [ ] Установлены Docker и Compose; пользователь в группе `docker`.
+- [ ] В корне репозитория создан `.env` из `.env.example`; заданы `DB_PASSWORD`, при необходимости `TG_*`, пароли клиентов.
+- [ ] Свободны порты **80**, **443** (если нужен HTTPS), **5432** (если Postgres с хоста), **3001** (Grafana), **8502** (прямая админка), **8503** (прямой клиентский Streamlit) — либо измените маппинг в `docker/docker-compose.yml`.
+- [ ] Запуск: `./scripts/start.sh` или `docker compose --env-file .env -f docker/docker-compose.yml up -d`.
+- [ ] Проверка: админка через nginx или `http://SERVER:8502`, при необходимости Grafana `http://SERVER:3001`.
+
+**Обновление кода / образов**
+
+- [ ] При крупных изменениях — бэкап БД (UI «Системные функции» или `pg_dump`, см. ниже).
+- [ ] `docker compose --env-file .env -f docker/docker-compose.yml pull` для сервисов на готовых образах.
+- [ ] `docker compose --env-file .env -f docker/docker-compose.yml up -d --build` для пересборки admin/client.
+
+У сервисов настроены **healthcheck** (Postgres, Streamlit, Grafana, nginx); nginx ждёт готовности admin и client (`depends_on` + `service_healthy`).
+
+---
+
 ## Быстрый старт
 
 ### 1. Настройка сервера
@@ -37,14 +57,21 @@ nano .env
 - `TG_TOKEN` — токен Telegram бота
 - `TG_ADMIN_ID` — ваш Chat ID
 
+**Telegram и сеть:** запросы идут на `https://api.telegram.org`. Если сервер или ваш канал в интернет без доступа к этому хосту (типично без VPN в некоторых регионах), отчёты в Telegram не дойдут — включите VPN на машине, с которой идёт запрос, или настройте исходящий прокси на уровне ОС/Docker. Импорт и база при этом продолжают работать.
+
+**Клиентский портал:** пароли вида `kwork123` / `free456` можно заменить переменными `AXIS_CLIENT_KWORK_PASSWORD` и `AXIS_CLIENT_FREELANCE_PASSWORD` в `.env` (см. `.env.example`).
+
 ### 4. Запуск
 
 ```bash
 # Установка прав
 chmod +x scripts/*.sh
 
-# Запуск
+# Запуск (скрипт подхватывает корневой .env для DB_* и Grafana)
 ./scripts/start.sh
+
+# Вручную из корня репозитория:
+# docker compose --env-file .env -f docker/docker-compose.yml up -d
 ```
 
 ---
@@ -80,13 +107,17 @@ work-tracker/
 | Сервис | URL | Логин | Пароль |
 |--------|-----|-------|--------|
 | Основное приложение | http://SERVER/ | admin | 2213 |
+| Админка напрямую (Docker) | http://SERVER:8502 | admin | 2213 |
 | Клиентский портал | http://SERVER/client | kwork | kwork123 |
+| Клиент напрямую (Streamlit, опционально) | http://SERVER:8503/client | kwork | kwork123 |
 | Grafana | http://SERVER:3001 | admin | admin |
 | База данных | localhost:5432 | user | из .env |
 
 ---
 
 ## Команды управления
+
+Если файла `.env` в корне нет, в командах `docker compose` опустите флаг `--env-file .env` (будут дефолты из YAML).
 
 ```bash
 # Запуск
@@ -96,15 +127,15 @@ work-tracker/
 ./scripts/stop.sh
 
 # Перезапуск
-docker-compose -f docker/docker-compose.yml restart
+docker compose --env-file .env -f docker/docker-compose.yml restart
 
 # Просмотр логов
-docker-compose -f docker/docker-compose.yml logs -f
+docker compose --env-file .env -f docker/docker-compose.yml logs -f
 
 # Обновление кода
-docker-compose -f docker/docker-compose.yml down
+docker compose --env-file .env -f docker/docker-compose.yml down
 # ...изменить код...
-docker-compose -f docker/docker-compose.yml up -d --build
+docker compose --env-file .env -f docker/docker-compose.yml up -d --build
 ```
 
 ---
@@ -141,7 +172,7 @@ nano docker/nginx.conf
 ### 4. Перезапустить nginx
 
 ```bash
-docker-compose -f docker/docker-compose.yml restart nginx
+docker compose --env-file .env -f docker/docker-compose.yml restart nginx
 ```
 
 ---
@@ -155,12 +186,12 @@ docker-compose -f docker/docker-compose.yml restart nginx
 
 ### Ручной бэкап
 ```bash
-docker-compose -f docker/docker-compose.yml exec -T db pg_dump -U user workday_db > backup.sql
+docker compose --env-file .env -f docker/docker-compose.yml exec -T db pg_dump -U user workday_db > backup.sql
 ```
 
 ### Восстановление
 ```bash
-cat backup.sql | docker-compose -f docker/docker-compose.yml exec -T db psql -U user -d workday_db
+cat backup.sql | docker compose --env-file .env -f docker/docker-compose.yml exec -T db psql -U user -d workday_db
 ```
 
 ---
@@ -193,23 +224,23 @@ sudo ufw enable
 
 ### Контейнер не запускается
 ```bash
-docker-compose -f docker/docker-compose.yml logs admin
+docker compose --env-file .env -f docker/docker-compose.yml logs admin
 ```
 
 ### Нет доступа к базе
 ```bash
-docker-compose -f docker/docker-compose.yml exec db psql -U user -d workday_db
+docker compose --env-file .env -f docker/docker-compose.yml exec db psql -U user -d workday_db
 ```
 
 ### Nginx ошибка
 ```bash
-docker-compose -f docker/docker-compose.yml logs nginx
+docker compose --env-file .env -f docker/docker-compose.yml logs nginx
 ```
 
 ### Очистка и перезапуск
 ```bash
-docker-compose -f docker/docker-compose.yml down -v
-docker-compose -f docker/docker-compose.yml up -d --build
+docker compose --env-file .env -f docker/docker-compose.yml down -v
+docker compose --env-file .env -f docker/docker-compose.yml up -d --build
 ```
 
 ---
@@ -217,6 +248,6 @@ docker-compose -f docker/docker-compose.yml up -d --build
 ## Контакты для поддержки
 
 При возникновении проблем:
-1. Проверить логи: `docker-compose -f docker/docker-compose.yml logs`
+1. Проверить логи: `docker compose --env-file .env -f docker/docker-compose.yml logs`
 2. Проверить .env настройки
 3. Перезапустить: `./scripts/stop.sh && ./scripts/start.sh`

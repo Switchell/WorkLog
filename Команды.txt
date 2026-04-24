@@ -1,0 +1,11 @@
+
+команда в терминале в папке
+docker exec -it axis_db psql -U user -d workday_db -c 'SELECT * FROM work_logs LIMIT 10; SELECT count(*) FROM work_logs;'
+
+
+команда в базе
+SELECT 
+  to_char("Date", 'YYYY-MM-DD') as "Date", 
+  "Sotrudnik", 
+  "Time" 
+FROM work_logs;

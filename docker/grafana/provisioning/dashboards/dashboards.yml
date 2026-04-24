@@ -1,0 +1,11 @@
+apiVersion: 1
+providers:
+  - name: AXIS
+    orgId: 1
+    folder: AXIS
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 60
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/dashboards

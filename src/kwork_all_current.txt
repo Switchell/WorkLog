@@ -1,0 +1,11 @@
+=== Актуальные заказы Kwork (3) ===
+
+1. Подбор и обработка фото курортов и отелей для сайта
+   https://kwork.ru/projects/3137344
+
+2. Отредактировать сайт на вордпрессе с woocommers
+   https://kwork.ru/projects/3137340
+
+3. Интеграция recaptcha на сайт
+   https://kwork.ru/projects/3137331
+
